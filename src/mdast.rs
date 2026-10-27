@@ -253,6 +253,10 @@ pub enum Node {
     Definition(Definition),
     /// Paragraph.
     Paragraph(Paragraph),
+
+    // CompMD.
+    /// CompMD: syntax, as written.
+    CompmdRaw(CompmdRaw),
 }
 
 impl fmt::Debug for Node {
@@ -293,6 +297,7 @@ impl fmt::Debug for Node {
             Node::ListItem(x) => x.fmt(f),
             Node::Definition(x) => x.fmt(f),
             Node::Paragraph(x) => x.fmt(f),
+            Node::CompmdRaw(x) => x.fmt(f),
         }
     }
 }
@@ -337,6 +342,7 @@ impl ToString for Node {
             Node::Code(x) => x.value.clone(),
             Node::Math(x) => x.value.clone(),
             Node::MdxFlowExpression(x) => x.value.clone(),
+            Node::CompmdRaw(x) => x.value.clone(),
 
             // Voids.
             Node::Break(_)
@@ -438,6 +444,7 @@ impl Node {
             Node::ListItem(x) => x.position.as_ref(),
             Node::Definition(x) => x.position.as_ref(),
             Node::Paragraph(x) => x.position.as_ref(),
+            Node::CompmdRaw(x) => x.position.as_ref(),
         }
     }
 
@@ -477,6 +484,7 @@ impl Node {
             Node::ListItem(x) => x.position.as_mut(),
             Node::Definition(x) => x.position.as_mut(),
             Node::Paragraph(x) => x.position.as_mut(),
+            Node::CompmdRaw(x) => x.position.as_mut(),
         }
     }
 
@@ -516,8 +524,54 @@ impl Node {
             Node::ListItem(x) => x.position = position,
             Node::Definition(x) => x.position = position,
             Node::Paragraph(x) => x.position = position,
+            Node::CompmdRaw(x) => x.position = position,
         }
     }
+}
+
+/// What CompMD syntax a [`CompmdRaw`] node holds.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+pub enum CompmdRawKind {
+    /// Component line: `::: card {title="Hi"}`, `::: /card`, `:: #slot`.
+    ComponentLine,
+    /// Inline component: `:badge[New]{tone=info}`.
+    ComponentInline,
+    /// Interpolation: `{{md.doc.title}}`.
+    Interpolation,
+    /// `{{` that starts no interpolation.
+    InterpolationLiteral,
+    /// Math (text), by Pandoc’s rule: `$x^2$`.
+    MathText,
+    /// Wiki link: `[[Target|label]]`.
+    WikiLink,
+}
+
+/// CompMD: syntax, as written.
+///
+/// Markdown parses CompMD’s constructs as tokens only; what a component line
+/// or an inline component means (opener, closer, slot, params) is decided
+/// from its text afterwards.
+///
+/// ```markdown
+/// > | a :badge[New]{tone=info} b
+///       ^^^^^^^^^^^^^^^^^^^^^^
+/// ```
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct CompmdRaw {
+    /// What it is.
+    pub kind: CompmdRawKind,
+    // Text.
+    /// The text as written.
+    pub value: String,
+    /// Positional info.
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub position: Option<Position>,
 }
 
 /// MDX: attribute content.
@@ -2339,6 +2393,32 @@ mod tests {
         assert_eq!(
             format!("{:?}", node),
             "MdxJsxTextElement { children: [], position: Some(1:1-1:2 (0-1)), name: None, attributes: [] }",
+            "should support `position_set`"
+        );
+    }
+
+    #[test]
+    fn compmd_raw() {
+        let mut node = Node::CompmdRaw(CompmdRaw {
+            kind: CompmdRawKind::Interpolation,
+            value: "{{a}}".into(),
+            position: None,
+        });
+
+        assert_eq!(
+            format!("{:?}", node),
+            "CompmdRaw { kind: Interpolation, value: \"{{a}}\", position: None }",
+            "should support `Debug`"
+        );
+        assert_eq!(node.to_string(), "{{a}}", "should support `ToString`");
+        assert_eq!(node.children_mut(), None, "should support `children_mut`");
+        assert_eq!(node.children(), None, "should support `children`");
+        assert_eq!(node.position(), None, "should support `position`");
+        assert_eq!(node.position_mut(), None, "should support `position`");
+        node.position_set(Some(Position::new(1, 1, 0, 1, 6, 5)));
+        assert_eq!(
+            format!("{:?}", node),
+            "CompmdRaw { kind: Interpolation, value: \"{{a}}\", position: Some(1:1-1:6 (0-5)) }",
             "should support `position_set`"
         );
     }
