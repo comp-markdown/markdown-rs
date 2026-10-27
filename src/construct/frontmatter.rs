@@ -28,7 +28,8 @@
 //!
 //! As there is no spec for frontmatter in markdown, this extension follows how
 //! YAML frontmatter works on `github.com`.
-//! It also parses TOML frontmatter, just like YAML except that it uses a `+`.
+//! It also parses TOML frontmatter, just like YAML except that it uses a `+`,
+//! unless `frontmatter_toml` is off.
 //!
 //! ## Recommendation
 //!
@@ -71,9 +72,12 @@ use crate::util::constant::FRONTMATTER_SEQUENCE_SIZE;
 ///   | ---
 /// ```
 pub fn start(tokenizer: &mut Tokenizer) -> State {
+    let constructs = &tokenizer.parse_state.options.constructs;
+
     // Indent not allowed.
-    if tokenizer.parse_state.options.constructs.frontmatter
-        && matches!(tokenizer.current, Some(b'+' | b'-'))
+    if constructs.frontmatter
+        && (tokenizer.current == Some(b'-')
+            || (constructs.frontmatter_toml && tokenizer.current == Some(b'+')))
     {
         tokenizer.tokenize_state.marker = tokenizer.current.unwrap();
         tokenizer.enter(Name::Frontmatter);

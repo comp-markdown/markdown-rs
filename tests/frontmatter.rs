@@ -37,6 +37,30 @@ fn frontmatter() -> Result<(), message::Message> {
         "should support frontmatter (toml)"
     );
 
+    let yaml_only = Options {
+        parse: ParseOptions {
+            constructs: Constructs {
+                frontmatter: true,
+                frontmatter_toml: false,
+                ..Default::default()
+            },
+            ..Default::default()
+        },
+        ..Default::default()
+    };
+
+    assert_eq!(
+        to_html_with_options("+++\ntitle = \"Jupyter\"\n+++", &yaml_only)?,
+        "<p>+++\ntitle = &quot;Jupyter&quot;\n+++</p>",
+        "should not support frontmatter (toml) w/ `frontmatter_toml: false`"
+    );
+
+    assert_eq!(
+        to_html_with_options("---\ntitle: Jupyter\n---", &yaml_only)?,
+        "",
+        "should support frontmatter (yaml) w/ `frontmatter_toml: false`"
+    );
+
     assert_eq!(
         to_html_with_options("---\n---", &frontmatter)?,
         "",
