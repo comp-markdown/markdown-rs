@@ -97,6 +97,52 @@ pub struct Constructs {
     ///       ^^^
     /// ```
     pub code_text: bool,
+    /// CompMD: inline component.
+    ///
+    /// ```markdown
+    /// > | a :badge[New]{tone=info} b
+    ///       ^^^^^^^^^^^^^^^^^^^^^^
+    /// ```
+    ///
+    /// For more information, see the CompMD spec:
+    /// <https://github.com/comp-markdown/compmd>.
+    pub compmd_component_inline: bool,
+    /// CompMD: component line.
+    ///
+    /// ```markdown
+    /// > | ::: card {title="Hi"}
+    ///     ^^^^^^^^^^^^^^^^^^^^^
+    ///   | b
+    /// > | ::: /card
+    ///     ^^^^^^^^^
+    /// ```
+    pub compmd_component_line: bool,
+    /// CompMD: interpolation.
+    ///
+    /// ```markdown
+    /// > | a {{md.doc.title}} b
+    ///       ^^^^^^^^^^^^^^^^
+    /// ```
+    pub compmd_interpolation: bool,
+    /// CompMD: math (text), by Pandoc’s rule.
+    ///
+    /// ```markdown
+    /// > | a $b$ c
+    ///       ^^^
+    /// ```
+    ///
+    /// > 👉 **Note**: unlike `math_text`, a dollar followed by white space
+    /// > doesn’t open math, a dollar followed by a digit doesn’t close it, and
+    /// > a dollar after white space ends the attempt, so dollar amounts stay
+    /// > text.
+    pub compmd_math_text: bool,
+    /// CompMD: wiki link.
+    ///
+    /// ```markdown
+    /// > | a [[Target|label]] b
+    ///       ^^^^^^^^^^^^^^^^
+    /// ```
+    pub compmd_wiki_link: bool,
     /// Definition.
     ///
     /// ```markdown
@@ -367,6 +413,11 @@ impl Default for Constructs {
             code_indented: true,
             code_fenced: true,
             code_text: true,
+            compmd_component_inline: false,
+            compmd_component_line: false,
+            compmd_interpolation: false,
+            compmd_math_text: false,
+            compmd_wiki_link: false,
             definition: true,
             frontmatter: false,
             frontmatter_toml: true,
@@ -450,6 +501,30 @@ impl Constructs {
             mdx_jsx_flow: true,
             mdx_jsx_text: true,
             ..Self::default()
+        }
+    }
+
+    /// CompMD.
+    ///
+    /// CompMD (Component Markdown) extends GFM with components, interpolation
+    /// and expressions.
+    /// This turns on GFM, YAML frontmatter, math (flow), and CompMD’s
+    /// component lines, inline components, interpolation, and math (text) by
+    /// Pandoc’s rule.
+    /// Wiki links are left off: a CompMD document turns them on itself.
+    ///
+    /// For more information, see the CompMD spec:
+    /// <https://github.com/comp-markdown/compmd>.
+    pub fn compmd() -> Self {
+        Self {
+            compmd_component_inline: true,
+            compmd_component_line: true,
+            compmd_interpolation: true,
+            compmd_math_text: true,
+            frontmatter: true,
+            frontmatter_toml: false,
+            math_flow: true,
+            ..Self::gfm()
         }
     }
 }
@@ -1419,6 +1494,30 @@ mod tests {
         );
         assert!(constructs.mdx_jsx_flow, "should support `mdx` shortcut (3)");
         assert!(!constructs.frontmatter, "should support `mdx` shortcut (4)");
+
+        let constructs = Constructs::default();
+        assert!(
+            !constructs.compmd_component_line,
+            "should default to `CommonMark` (5)"
+        );
+
+        let constructs = Constructs::compmd();
+        assert!(
+            constructs.gfm_autolink_literal,
+            "should support `compmd` shortcut (1)"
+        );
+        assert!(
+            constructs.compmd_component_line && constructs.compmd_math_text,
+            "should support `compmd` shortcut (2)"
+        );
+        assert!(
+            constructs.frontmatter && !constructs.frontmatter_toml,
+            "should support `compmd` shortcut (3)"
+        );
+        assert!(
+            !constructs.math_text && !constructs.compmd_wiki_link,
+            "should support `compmd` shortcut (4)"
+        );
     }
 
     #[test]
@@ -1471,7 +1570,7 @@ mod tests {
 
         assert_eq!(
             format!("{:?}", ParseOptions::default()),
-            "ParseOptions { constructs: Constructs { attention: true, autolink: true, block_quote: true, character_escape: true, character_reference: true, code_indented: true, code_fenced: true, code_text: true, definition: true, frontmatter: false, frontmatter_toml: true, gfm_autolink_literal: false, gfm_footnote_definition: false, gfm_label_start_footnote: false, gfm_strikethrough: false, gfm_table: false, gfm_task_list_item: false, hard_break_escape: true, hard_break_trailing: true, heading_atx: true, heading_setext: true, html_flow: true, html_text: true, label_start_image: true, label_start_link: true, label_end: true, list_item: true, math_flow: false, math_text: false, mdx_esm: false, mdx_expression_flow: false, mdx_expression_text: false, mdx_jsx_flow: false, mdx_jsx_text: false, thematic_break: true }, gfm_strikethrough_single_tilde: true, math_text_single_dollar: true, mdx_expression_parse: None, mdx_esm_parse: None }",
+            "ParseOptions { constructs: Constructs { attention: true, autolink: true, block_quote: true, character_escape: true, character_reference: true, code_indented: true, code_fenced: true, code_text: true, compmd_component_inline: false, compmd_component_line: false, compmd_interpolation: false, compmd_math_text: false, compmd_wiki_link: false, definition: true, frontmatter: false, frontmatter_toml: true, gfm_autolink_literal: false, gfm_footnote_definition: false, gfm_label_start_footnote: false, gfm_strikethrough: false, gfm_table: false, gfm_task_list_item: false, hard_break_escape: true, hard_break_trailing: true, heading_atx: true, heading_setext: true, html_flow: true, html_text: true, label_start_image: true, label_start_link: true, label_end: true, list_item: true, math_flow: false, math_text: false, mdx_esm: false, mdx_expression_flow: false, mdx_expression_text: false, mdx_jsx_flow: false, mdx_jsx_text: false, thematic_break: true }, gfm_strikethrough_single_tilde: true, math_text_single_dollar: true, mdx_expression_parse: None, mdx_esm_parse: None }",
             "should support `Debug` trait"
         );
         assert_eq!(
@@ -1484,7 +1583,7 @@ mod tests {
                 })),
                 ..Default::default()
             }),
-            "ParseOptions { constructs: Constructs { attention: true, autolink: true, block_quote: true, character_escape: true, character_reference: true, code_indented: true, code_fenced: true, code_text: true, definition: true, frontmatter: false, frontmatter_toml: true, gfm_autolink_literal: false, gfm_footnote_definition: false, gfm_label_start_footnote: false, gfm_strikethrough: false, gfm_table: false, gfm_task_list_item: false, hard_break_escape: true, hard_break_trailing: true, heading_atx: true, heading_setext: true, html_flow: true, html_text: true, label_start_image: true, label_start_link: true, label_end: true, list_item: true, math_flow: false, math_text: false, mdx_esm: false, mdx_expression_flow: false, mdx_expression_text: false, mdx_jsx_flow: false, mdx_jsx_text: false, thematic_break: true }, gfm_strikethrough_single_tilde: true, math_text_single_dollar: true, mdx_expression_parse: Some(\"[Function]\"), mdx_esm_parse: Some(\"[Function]\") }",
+            "ParseOptions { constructs: Constructs { attention: true, autolink: true, block_quote: true, character_escape: true, character_reference: true, code_indented: true, code_fenced: true, code_text: true, compmd_component_inline: false, compmd_component_line: false, compmd_interpolation: false, compmd_math_text: false, compmd_wiki_link: false, definition: true, frontmatter: false, frontmatter_toml: true, gfm_autolink_literal: false, gfm_footnote_definition: false, gfm_label_start_footnote: false, gfm_strikethrough: false, gfm_table: false, gfm_task_list_item: false, hard_break_escape: true, hard_break_trailing: true, heading_atx: true, heading_setext: true, html_flow: true, html_text: true, label_start_image: true, label_start_link: true, label_end: true, list_item: true, math_flow: false, math_text: false, mdx_esm: false, mdx_expression_flow: false, mdx_expression_text: false, mdx_jsx_flow: false, mdx_jsx_text: false, thematic_break: true }, gfm_strikethrough_single_tilde: true, math_text_single_dollar: true, mdx_expression_parse: Some(\"[Function]\"), mdx_esm_parse: Some(\"[Function]\") }",
             "should support `Debug` trait on mdx functions"
         );
     }
