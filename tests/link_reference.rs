@@ -390,6 +390,18 @@ fn link_reference() -> Result<(), message::Message> {
     );
 
     assert_eq!(
+        to_html("[a b]\n\n[ab]: /x"),
+        "<p>[a b]</p>\n",
+        "should keep the whitespace after a first word at the start of a label"
+    );
+
+    assert_eq!(
+        to_html("[a b]\n\n[a  b]: /x"),
+        "<p><a href=\"/x\">a b</a></p>\n",
+        "should match labels that differ only in whitespace"
+    );
+
+    assert_eq!(
         to_html_with_options(
             "[x]()",
             &Options {

@@ -59,7 +59,8 @@ pub fn normalize_identifier(value: &str) -> String {
         }
         // First non-whitespace we see after whitespace.
         else if in_whitespace {
-            if start != 0 {
+            // Not before the first word, which can start at `0` or later.
+            if !result.is_empty() {
                 result.push(' ');
             }
 
