@@ -9,6 +9,9 @@
 # markdown-rs
 
 > **This is CompMD's fork of markdown-rs.**
+> CompMD (Component Markdown) is a Markdown flavor that adds components, containers, slots and layout to CommonMark
+> and GFM, and stays readable in any plain Markdown renderer; see its
+> [specification](https://github.com/comp-markdown/compmd/blob/main/compmd-spec-v1.md).
 > The branch `compmd` holds CompMD's syntax on top of upstream's release tags.
 > It is a submodule of [`comp-markdown/compmd`](https://github.com/comp-markdown/compmd), and will be published as the
 > crate `compmd-markdown` (the library keeps the name `markdown`).
