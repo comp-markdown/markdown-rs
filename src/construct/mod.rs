@@ -62,6 +62,7 @@
 //!
 //! The following constructs are extensions found in markdown:
 //!
+//! * [compmd component line][compmd_component_line]
 //! * [frontmatter][]
 //! * [gfm autolink literal][gfm_autolink_literal]
 //! * [gfm footnote definition][gfm_footnote_definition]
@@ -155,6 +156,7 @@ pub mod block_quote;
 pub mod character_escape;
 pub mod character_reference;
 pub mod code_indented;
+pub mod compmd_component_line;
 pub mod content;
 pub mod definition;
 pub mod document;

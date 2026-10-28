@@ -391,6 +391,7 @@ fn exit(context: &mut CompileContext) {
         Name::CodeFencedFenceInfo => on_exit_raw_flow_fence_info(context),
         Name::CodeFlowChunk | Name::MathFlowChunk => on_exit_raw_flow_chunk(context),
         Name::CodeText | Name::MathText => on_exit_raw_text(context),
+        Name::CompmdComponentLine => on_exit_compmd_component_line(context),
         Name::Definition => on_exit_definition(context),
         Name::DefinitionDestinationString => on_exit_definition_destination_string(context),
         Name::DefinitionLabelString => on_exit_definition_label_string(context),
@@ -1559,6 +1560,16 @@ fn on_exit_strong(context: &mut CompileContext) {
 fn on_exit_thematic_break(context: &mut CompileContext) {
     context.line_ending_if_needed();
     context.push("<hr />");
+}
+
+/// Handle [`Exit`][Kind::Exit]:[`CompmdComponentLine`][Name::CompmdComponentLine].
+///
+/// Written as a paragraph of its text, as markdown without CompMD shows it.
+fn on_exit_compmd_component_line(context: &mut CompileContext) {
+    context.line_ending_if_needed();
+    context.push("<p>");
+    on_exit_data(context);
+    context.push("</p>");
 }
 
 /// Generate a footnote section.

@@ -83,6 +83,10 @@ pub enum Name {
     CodeIndentedFurtherBegin,
     CodeIndentedFurtherAfter,
 
+    CompmdComponentLineStart,
+    CompmdComponentLineBefore,
+    CompmdComponentLineInside,
+
     ContentChunkStart,
     ContentChunkInside,
     ContentDefinitionBefore,
@@ -137,6 +141,7 @@ pub enum Name {
     FlowBeforeHeadingAtx,
     FlowBeforeHeadingSetext,
     FlowBeforeThematicBreak,
+    FlowBeforeCompmdComponentLine,
     FlowAfter,
     FlowBlankLineBefore,
     FlowBlankLineAfter,
@@ -512,6 +517,10 @@ pub fn call(tokenizer: &mut Tokenizer, name: Name) -> State {
         Name::CodeIndentedFurtherBegin => construct::code_indented::further_begin,
         Name::CodeIndentedFurtherAfter => construct::code_indented::further_after,
 
+        Name::CompmdComponentLineStart => construct::compmd_component_line::start,
+        Name::CompmdComponentLineBefore => construct::compmd_component_line::before,
+        Name::CompmdComponentLineInside => construct::compmd_component_line::inside,
+
         Name::ContentChunkStart => construct::content::chunk_start,
         Name::ContentChunkInside => construct::content::chunk_inside,
         Name::ContentDefinitionBefore => construct::content::definition_before,
@@ -574,6 +583,7 @@ pub fn call(tokenizer: &mut Tokenizer, name: Name) -> State {
         Name::FlowBeforeHeadingAtx => construct::flow::before_heading_atx,
         Name::FlowBeforeHeadingSetext => construct::flow::before_heading_setext,
         Name::FlowBeforeThematicBreak => construct::flow::before_thematic_break,
+        Name::FlowBeforeCompmdComponentLine => construct::flow::before_compmd_component_line,
         Name::FlowAfter => construct::flow::after,
         Name::FlowBlankLineBefore => construct::flow::blank_line_before,
         Name::FlowBlankLineAfter => construct::flow::blank_line_after,

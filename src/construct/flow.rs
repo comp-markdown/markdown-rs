@@ -12,6 +12,7 @@
 //!
 //! * [Blank line][crate::construct::blank_line]
 //! * [Code (indented)][crate::construct::code_indented]
+//! * [CompMD: component line][crate::construct::compmd_component_line]
 //! * [Heading (atx)][crate::construct::heading_atx]
 //! * [Heading (setext)][crate::construct::heading_setext]
 //! * [HTML (flow)][crate::construct::html_flow]
@@ -196,9 +197,23 @@ pub fn before_heading_setext(tokenizer: &mut Tokenizer) -> State {
 pub fn before_thematic_break(tokenizer: &mut Tokenizer) -> State {
     tokenizer.attempt(
         State::Next(StateName::FlowAfter),
-        State::Next(StateName::FlowBeforeMdxExpression),
+        State::Next(StateName::FlowBeforeCompmdComponentLine),
     );
     State::Retry(StateName::ThematicBreakStart)
+}
+
+/// At CompMD component line.
+///
+/// ```markdown
+/// > | ::: card
+///     ^
+/// ```
+pub fn before_compmd_component_line(tokenizer: &mut Tokenizer) -> State {
+    tokenizer.attempt(
+        State::Next(StateName::FlowAfter),
+        State::Next(StateName::FlowBeforeMdxExpression),
+    );
+    State::Retry(StateName::CompmdComponentLineStart)
 }
 
 /// At MDX expression (flow).

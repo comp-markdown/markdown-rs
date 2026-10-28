@@ -2,9 +2,9 @@
 
 use crate::event::{Event, Kind, Name};
 use crate::mdast::{
-    AttributeContent, AttributeValue, AttributeValueExpression, Blockquote, Break, Code,
-    Definition, Delete, Emphasis, FootnoteDefinition, FootnoteReference, Heading, Html, Image,
-    ImageReference, InlineCode, InlineMath, Link, LinkReference, List, ListItem, Math,
+    AttributeContent, AttributeValue, AttributeValueExpression, Blockquote, Break, Code, CompmdRaw,
+    CompmdRawKind, Definition, Delete, Emphasis, FootnoteDefinition, FootnoteReference, Heading,
+    Html, Image, ImageReference, InlineCode, InlineMath, Link, LinkReference, List, ListItem, Math,
     MdxFlowExpression, MdxJsxAttribute, MdxJsxExpressionAttribute, MdxJsxFlowElement,
     MdxJsxTextElement, MdxTextExpression, MdxjsEsm, Node, Paragraph, ReferenceKind, Root, Strong,
     Table, TableCell, TableRow, Text, ThematicBreak, Toml, Yaml,
@@ -291,6 +291,7 @@ fn enter(context: &mut CompileContext) -> Result<(), message::Message> {
         Name::CodeFenced => on_enter_code_fenced(context),
         Name::CodeIndented => on_enter_code_indented(context),
         Name::CodeText => on_enter_code_text(context),
+        Name::CompmdComponentLine => on_enter_compmd_raw(context, CompmdRawKind::ComponentLine),
         Name::Definition => on_enter_definition(context),
         Name::Emphasis => on_enter_emphasis(context),
         Name::Frontmatter => on_enter_frontmatter(context),
@@ -387,6 +388,7 @@ fn exit(context: &mut CompileContext) -> Result<(), message::Message> {
         Name::CodeFenced | Name::MathFlow => on_exit_raw_flow(context)?,
         Name::CodeIndented => on_exit_code_indented(context)?,
         Name::CodeText | Name::MathText => on_exit_raw_text(context)?,
+        Name::CompmdComponentLine => on_exit_compmd_raw(context)?,
         Name::DefinitionDestinationString => on_exit_definition_destination_string(context),
         Name::DefinitionLabelString | Name::GfmFootnoteDefinitionLabelString => {
             on_exit_definition_id(context);
@@ -691,6 +693,15 @@ fn on_enter_resource(context: &mut CompileContext) {
 fn on_enter_strong(context: &mut CompileContext) {
     context.tail_push(Node::Strong(Strong {
         children: vec![],
+        position: None,
+    }));
+}
+
+/// Handle [`Enter`][Kind::Enter]:[`CompmdComponentLine`][Name::CompmdComponentLine].
+fn on_enter_compmd_raw(context: &mut CompileContext, kind: CompmdRawKind) {
+    context.tail_push(Node::CompmdRaw(CompmdRaw {
+        kind,
+        value: String::new(),
         position: None,
     }));
 }
@@ -1113,6 +1124,22 @@ fn on_exit_data(context: &mut CompileContext) -> Result<(), message::Message> {
         text.value.push_str(value.as_str());
     } else {
         unreachable!("expected text on stack");
+    }
+    on_exit(context)?;
+    Ok(())
+}
+
+/// Handle [`Exit`][Kind::Exit]:[`CompmdComponentLine`][Name::CompmdComponentLine].
+fn on_exit_compmd_raw(context: &mut CompileContext) -> Result<(), message::Message> {
+    let value = Slice::from_position(
+        context.bytes,
+        &SlicePosition::from_exit_event(context.events, context.index),
+    )
+    .serialize();
+    if let Node::CompmdRaw(node) = context.tail_mut() {
+        node.value = value;
+    } else {
+        unreachable!("expected compmd raw on stack");
     }
     on_exit(context)?;
     Ok(())
