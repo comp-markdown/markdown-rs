@@ -371,7 +371,11 @@ fn exit(context: &mut CompileContext) {
             on_exit_drop(context);
         }
         Name::MdxEsm | Name::MdxFlowExpression | Name::MdxJsxFlowTag => on_exit_drop_slurp(context),
-        Name::CharacterEscapeValue | Name::CodeTextData | Name::Data | Name::MathTextData => {
+        Name::CharacterEscapeValue
+        | Name::CodeTextData
+        | Name::CompmdComponentInline
+        | Name::Data
+        | Name::MathTextData => {
             on_exit_data(context);
         }
         Name::AutolinkEmail => on_exit_autolink_email(context),

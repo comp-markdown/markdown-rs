@@ -83,6 +83,29 @@ pub enum Name {
     CodeIndentedFurtherBegin,
     CodeIndentedFurtherAfter,
 
+    CompmdComponentInlineStart,
+    CompmdComponentInlineNameStart,
+    CompmdComponentInlineName,
+    CompmdComponentInlineFallback,
+    CompmdComponentInlineFallbackEscape,
+    CompmdComponentInlineFallbackRun,
+    CompmdComponentInlineCodeOpen,
+    CompmdComponentInlineCodeInside,
+    CompmdComponentInlineCodeClose,
+    CompmdComponentInlineAfterFallback,
+    CompmdComponentInlineEnd,
+    CompmdComponentInlineParamsOpen,
+    CompmdComponentInlineParams,
+    CompmdComponentInlineParamsString,
+    CompmdComponentInlineParamsStringEscape,
+    CompmdComponentInlineParamsExpression,
+    CompmdComponentInlineParamsExpressionQuote,
+    CompmdComponentInlineParamsExpressionString,
+    CompmdComponentInlineParamsExpressionEscape,
+    CompmdComponentInlineParamsJson,
+    CompmdComponentInlineParamsJsonString,
+    CompmdComponentInlineParamsJsonEscape,
+
     CompmdComponentLineStart,
     CompmdComponentLineBefore,
     CompmdComponentLineInside,
@@ -516,6 +539,49 @@ pub fn call(tokenizer: &mut Tokenizer, name: Name) -> State {
         Name::CodeIndentedInside => construct::code_indented::inside,
         Name::CodeIndentedFurtherBegin => construct::code_indented::further_begin,
         Name::CodeIndentedFurtherAfter => construct::code_indented::further_after,
+
+        Name::CompmdComponentInlineStart => construct::compmd_component_inline::start,
+        Name::CompmdComponentInlineNameStart => construct::compmd_component_inline::name_start,
+        Name::CompmdComponentInlineName => construct::compmd_component_inline::name,
+        Name::CompmdComponentInlineFallback => construct::compmd_component_inline::fallback,
+        Name::CompmdComponentInlineFallbackEscape => {
+            construct::compmd_component_inline::fallback_escape
+        }
+        Name::CompmdComponentInlineFallbackRun => construct::compmd_component_inline::fallback_run,
+        Name::CompmdComponentInlineCodeOpen => construct::compmd_component_inline::code_open,
+        Name::CompmdComponentInlineCodeInside => construct::compmd_component_inline::code_inside,
+        Name::CompmdComponentInlineCodeClose => construct::compmd_component_inline::code_close,
+        Name::CompmdComponentInlineAfterFallback => {
+            construct::compmd_component_inline::after_fallback
+        }
+        Name::CompmdComponentInlineEnd => construct::compmd_component_inline::end,
+        Name::CompmdComponentInlineParamsOpen => construct::compmd_component_inline::params_open,
+        Name::CompmdComponentInlineParams => construct::compmd_component_inline::params,
+        Name::CompmdComponentInlineParamsString => {
+            construct::compmd_component_inline::params_string
+        }
+        Name::CompmdComponentInlineParamsStringEscape => {
+            construct::compmd_component_inline::params_string_escape
+        }
+        Name::CompmdComponentInlineParamsExpression => {
+            construct::compmd_component_inline::params_expression
+        }
+        Name::CompmdComponentInlineParamsExpressionQuote => {
+            construct::compmd_component_inline::params_expression_quote
+        }
+        Name::CompmdComponentInlineParamsExpressionString => {
+            construct::compmd_component_inline::params_expression_string
+        }
+        Name::CompmdComponentInlineParamsExpressionEscape => {
+            construct::compmd_component_inline::params_expression_escape
+        }
+        Name::CompmdComponentInlineParamsJson => construct::compmd_component_inline::params_json,
+        Name::CompmdComponentInlineParamsJsonString => {
+            construct::compmd_component_inline::params_json_string
+        }
+        Name::CompmdComponentInlineParamsJsonEscape => {
+            construct::compmd_component_inline::params_json_escape
+        }
 
         Name::CompmdComponentLineStart => construct::compmd_component_line::start,
         Name::CompmdComponentLineBefore => construct::compmd_component_line::before,

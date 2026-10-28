@@ -10,6 +10,7 @@
 //! * [Autolink][crate::construct::autolink]
 //! * [Character escape][crate::construct::character_escape]
 //! * [Character reference][crate::construct::character_reference]
+//! * [CompMD: inline component][crate::construct::compmd_component_inline]
 //! * [Raw (text)][crate::construct::raw_text] (code (text), math (text))
 //! * [GFM: Label start (footnote)][crate::construct::gfm_label_start_footnote]
 //! * [GFM: Task list item check][crate::construct::gfm_task_list_item_check]
@@ -32,11 +33,12 @@ use crate::subtokenize::Subresult;
 use crate::tokenizer::Tokenizer;
 
 /// Characters that can start something in text.
-const MARKERS: [u8; 16] = [
+const MARKERS: [u8; 17] = [
     b'!',  // `label_start_image`
     b'$',  // `raw_text` (math (text))
     b'&',  // `character_reference`
     b'*',  // `attention` (emphasis, strong)
+    b':',  // `compmd_component_inline`
     b'<',  // `autolink`, `html_text`, `mdx_jsx_text`
     b'H',  // `gfm_autolink_literal` (`protocol` kind)
     b'W',  // `gfm_autolink_literal` (`www.` kind)
@@ -112,6 +114,13 @@ pub fn before(tokenizer: &mut Tokenizer) -> State {
                 State::Next(StateName::TextBeforeData),
             );
             State::Retry(StateName::AttentionStart)
+        }
+        Some(b':') => {
+            tokenizer.attempt(
+                State::Next(StateName::TextBefore),
+                State::Next(StateName::TextBeforeData),
+            );
+            State::Retry(StateName::CompmdComponentInlineStart)
         }
         // `autolink`, `html_text` (order does not matter), `mdx_jsx_text` (order matters).
         Some(b'<') => {

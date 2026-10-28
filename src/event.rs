@@ -555,6 +555,24 @@ pub enum Name {
     ///       ^ ^
     /// ```
     CodeTextSequence,
+    /// CompMD: inline component.
+    ///
+    /// ## Info
+    ///
+    /// * **Context**:
+    ///   [text content][crate::construct::text]
+    /// * **Content model**:
+    ///   void
+    /// * **Construct**:
+    ///   [`compmd_component_inline`][crate::construct::compmd_component_inline]
+    ///
+    /// ## Example
+    ///
+    /// ```markdown
+    /// > | a :badge[New]{tone=info} b
+    ///       ^^^^^^^^^^^^^^^^^^^^^^
+    /// ```
+    CompmdComponentInline,
     /// CompMD: component line.
     ///
     /// ## Info
@@ -3399,7 +3417,7 @@ pub enum Name {
 }
 
 /// List of void events, used to make sure everything is working well.
-pub const VOID_EVENTS: [Name; 77] = [
+pub const VOID_EVENTS: [Name; 78] = [
     Name::AttentionSequence,
     Name::AutolinkEmail,
     Name::AutolinkMarker,
@@ -3418,6 +3436,7 @@ pub const VOID_EVENTS: [Name; 77] = [
     Name::CodeFlowChunk,
     Name::CodeTextData,
     Name::CodeTextSequence,
+    Name::CompmdComponentInline,
     Name::CompmdComponentLine,
     Name::Data,
     Name::DefinitionDestinationLiteralMarker,
