@@ -376,6 +376,7 @@ fn exit(context: &mut CompileContext) {
         | Name::CompmdComponentInline
         | Name::CompmdInterpolation
         | Name::CompmdInterpolationLiteral
+        | Name::CompmdWikiLink
         | Name::Data
         | Name::MathTextData => {
             on_exit_data(context);

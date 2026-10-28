@@ -299,6 +299,7 @@ fn enter(context: &mut CompileContext) -> Result<(), message::Message> {
         Name::CompmdInterpolationLiteral => {
             on_enter_compmd_raw(context, CompmdRawKind::InterpolationLiteral);
         }
+        Name::CompmdWikiLink => on_enter_compmd_raw(context, CompmdRawKind::WikiLink),
         Name::Definition => on_enter_definition(context),
         Name::Emphasis => on_enter_emphasis(context),
         Name::Frontmatter => on_enter_frontmatter(context),
@@ -398,7 +399,8 @@ fn exit(context: &mut CompileContext) -> Result<(), message::Message> {
         Name::CompmdComponentInline
         | Name::CompmdComponentLine
         | Name::CompmdInterpolation
-        | Name::CompmdInterpolationLiteral => on_exit_compmd_raw(context)?,
+        | Name::CompmdInterpolationLiteral
+        | Name::CompmdWikiLink => on_exit_compmd_raw(context)?,
         Name::DefinitionDestinationString => on_exit_definition_destination_string(context),
         Name::DefinitionLabelString | Name::GfmFootnoteDefinitionLabelString => {
             on_exit_definition_id(context);

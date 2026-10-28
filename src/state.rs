@@ -126,6 +126,13 @@ pub enum Name {
     CompmdMathTextContent,
     CompmdMathTextEscape,
 
+    CompmdWikiLinkStart,
+    CompmdWikiLinkOpen,
+    CompmdWikiLinkPartStart,
+    CompmdWikiLinkPart,
+    CompmdWikiLinkSeparator,
+    CompmdWikiLinkClose,
+
     ContentChunkStart,
     ContentChunkInside,
     ContentDefinitionBefore,
@@ -495,6 +502,7 @@ pub enum Name {
     TextBeforeHtml,
     TextBeforeMdxJsx,
     TextBeforeHardBreakEscape,
+    TextBeforeGfmLabelStartFootnote,
     TextBeforeLabelStartLink,
     TextBeforeRawText,
     TextBeforeCompmdInterpolationLiteral,
@@ -621,6 +629,13 @@ pub fn call(tokenizer: &mut Tokenizer, name: Name) -> State {
         Name::CompmdMathTextInside => construct::compmd_math_text::inside,
         Name::CompmdMathTextContent => construct::compmd_math_text::content,
         Name::CompmdMathTextEscape => construct::compmd_math_text::escape,
+
+        Name::CompmdWikiLinkStart => construct::compmd_wiki_link::start,
+        Name::CompmdWikiLinkOpen => construct::compmd_wiki_link::open,
+        Name::CompmdWikiLinkPartStart => construct::compmd_wiki_link::part_start,
+        Name::CompmdWikiLinkPart => construct::compmd_wiki_link::part,
+        Name::CompmdWikiLinkSeparator => construct::compmd_wiki_link::separator,
+        Name::CompmdWikiLinkClose => construct::compmd_wiki_link::close,
 
         Name::ContentChunkStart => construct::content::chunk_start,
         Name::ContentChunkInside => construct::content::chunk_inside,
@@ -1061,6 +1076,7 @@ pub fn call(tokenizer: &mut Tokenizer, name: Name) -> State {
         Name::TextBeforeHtml => construct::text::before_html,
         Name::TextBeforeMdxJsx => construct::text::before_mdx_jsx,
         Name::TextBeforeHardBreakEscape => construct::text::before_hard_break_escape,
+        Name::TextBeforeGfmLabelStartFootnote => construct::text::before_gfm_label_start_footnote,
         Name::TextBeforeLabelStartLink => construct::text::before_label_start_link,
         Name::TextBeforeRawText => construct::text::before_raw_text,
         Name::TextBeforeCompmdInterpolationLiteral => {

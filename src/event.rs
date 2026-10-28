@@ -627,6 +627,24 @@ pub enum Name {
     ///       ^^
     /// ```
     CompmdInterpolationLiteral,
+    /// CompMD: wiki link.
+    ///
+    /// ## Info
+    ///
+    /// * **Context**:
+    ///   [text content][crate::construct::text]
+    /// * **Content model**:
+    ///   void
+    /// * **Construct**:
+    ///   [`compmd_wiki_link`][crate::construct::compmd_wiki_link]
+    ///
+    /// ## Example
+    ///
+    /// ```markdown
+    /// > | a [[Target|label]] b
+    ///       ^^^^^^^^^^^^^^^^
+    /// ```
+    CompmdWikiLink,
     /// Content.
     ///
     /// ## Info
@@ -3453,7 +3471,7 @@ pub enum Name {
 }
 
 /// List of void events, used to make sure everything is working well.
-pub const VOID_EVENTS: [Name; 80] = [
+pub const VOID_EVENTS: [Name; 81] = [
     Name::AttentionSequence,
     Name::AutolinkEmail,
     Name::AutolinkMarker,
@@ -3476,6 +3494,7 @@ pub const VOID_EVENTS: [Name; 80] = [
     Name::CompmdComponentLine,
     Name::CompmdInterpolation,
     Name::CompmdInterpolationLiteral,
+    Name::CompmdWikiLink,
     Name::Data,
     Name::DefinitionDestinationLiteralMarker,
     Name::DefinitionLabelMarker,

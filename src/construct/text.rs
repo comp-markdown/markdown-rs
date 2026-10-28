@@ -13,6 +13,7 @@
 //! * [CompMD: inline component][crate::construct::compmd_component_inline]
 //! * [CompMD: interpolation][crate::construct::compmd_interpolation]
 //! * [CompMD: math (text)][crate::construct::compmd_math_text]
+//! * [CompMD: wiki link][crate::construct::compmd_wiki_link]
 //! * [Raw (text)][crate::construct::raw_text] (code (text), math (text))
 //! * [GFM: Label start (footnote)][crate::construct::gfm_label_start_footnote]
 //! * [GFM: Task list item check][crate::construct::gfm_task_list_item_check]
@@ -44,7 +45,7 @@ const MARKERS: [u8; 17] = [
     b'<',  // `autolink`, `html_text`, `mdx_jsx_text`
     b'H',  // `gfm_autolink_literal` (`protocol` kind)
     b'W',  // `gfm_autolink_literal` (`www.` kind)
-    b'[',  // `label_start_link`
+    b'[',  // `compmd_wiki_link`, `label_start_link`
     b'\\', // `character_escape`, `hard_break_escape`
     b']',  // `label_end`, `gfm_label_start_footnote`
     b'_',  // `attention` (emphasis, strong)
@@ -148,12 +149,13 @@ pub fn before(tokenizer: &mut Tokenizer) -> State {
             );
             State::Retry(StateName::GfmAutolinkLiteralWwwStart)
         }
+        // `compmd_wiki_link`, `gfm_label_start_footnote`, `label_start_link` (order matters).
         Some(b'[') => {
             tokenizer.attempt(
                 State::Next(StateName::TextBefore),
-                State::Next(StateName::TextBeforeLabelStartLink),
+                State::Next(StateName::TextBeforeGfmLabelStartFootnote),
             );
-            State::Retry(StateName::GfmLabelStartFootnoteStart)
+            State::Retry(StateName::CompmdWikiLinkStart)
         }
         Some(b'\\') => {
             tokenizer.attempt(
@@ -275,6 +277,22 @@ pub fn before_hard_break_escape(tokenizer: &mut Tokenizer) -> State {
         State::Next(StateName::TextBeforeData),
     );
     State::Retry(StateName::HardBreakEscapeStart)
+}
+
+/// Before GFM label start (footnote).
+///
+/// At `[`, which wasn’t a CompMD wiki link.
+///
+/// ```markdown
+/// > | [^a]
+///     ^
+/// ```
+pub fn before_gfm_label_start_footnote(tokenizer: &mut Tokenizer) -> State {
+    tokenizer.attempt(
+        State::Next(StateName::TextBefore),
+        State::Next(StateName::TextBeforeLabelStartLink),
+    );
+    State::Retry(StateName::GfmLabelStartFootnoteStart)
 }
 
 /// Before label start (link).

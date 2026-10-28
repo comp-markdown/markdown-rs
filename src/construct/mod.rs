@@ -66,6 +66,7 @@
 //! * [compmd component line][compmd_component_line]
 //! * [compmd interpolation][compmd_interpolation]
 //! * [compmd math (text)][compmd_math_text]
+//! * [compmd wiki link][compmd_wiki_link]
 //! * [frontmatter][]
 //! * [gfm autolink literal][gfm_autolink_literal]
 //! * [gfm footnote definition][gfm_footnote_definition]
@@ -163,6 +164,7 @@ pub mod compmd_component_inline;
 pub mod compmd_component_line;
 pub mod compmd_interpolation;
 pub mod compmd_math_text;
+pub mod compmd_wiki_link;
 pub mod content;
 pub mod definition;
 pub mod document;
