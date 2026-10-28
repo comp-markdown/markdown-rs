@@ -8,6 +8,30 @@
 
 # markdown-rs
 
+> **This is CompMD's fork of markdown-rs.**
+> The branch `compmd` holds CompMD's syntax on top of upstream's release tags.
+> It is a submodule of [`comp-markdown/compmd`](https://github.com/comp-markdown/compmd), and will be published as the
+> crate `compmd-markdown` (the library keeps the name `markdown`).
+>
+> * Flags, all off by default: `compmd_component_line`, `compmd_component_inline`, `compmd_interpolation`,
+>   `compmd_math_text` (inline math by Pandoc's rule) and `compmd_wiki_link`; also `frontmatter_toml`
+>   (on by default), which lets `frontmatter` be YAML only.
+> * `Constructs::compmd()` turns on GFM, YAML frontmatter, display math and all CompMD constructs except wiki links.
+> * Raw CompMD forms come out as `Node::CompmdRaw` nodes in mdast and as escaped text in HTML.
+> * The fork also fixes whitespace after a first word in `normalize_identifier`.
+>
+> Running the tests needs older versions of a few of `swc_common`'s dependencies, because `swc_common` 8 doesn't build
+> with serde 1.0.220 or newer. `Cargo.lock` isn't committed, so pin them once in a fresh clone:
+>
+> ```sh
+> cargo update -p serde_json --precise 1.0.142
+> cargo update -p env_logger --precise 0.11.6
+> cargo update -p cargo-platform --precise 0.3.0
+> cargo update -p semver --precise 1.0.26
+> cargo update -p camino --precise 1.1.10
+> cargo update -p serde --precise 1.0.219
+> ```
+
 [![Build][badge-build-image]][badge-build-url]
 [![Coverage][badge-coverage-image]][badge-coverage-url]
 
