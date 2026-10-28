@@ -11,6 +11,7 @@
 //! * [Character escape][crate::construct::character_escape]
 //! * [Character reference][crate::construct::character_reference]
 //! * [CompMD: inline component][crate::construct::compmd_component_inline]
+//! * [CompMD: interpolation][crate::construct::compmd_interpolation]
 //! * [Raw (text)][crate::construct::raw_text] (code (text), math (text))
 //! * [GFM: Label start (footnote)][crate::construct::gfm_label_start_footnote]
 //! * [GFM: Task list item check][crate::construct::gfm_task_list_item_check]
@@ -49,7 +50,7 @@ const MARKERS: [u8; 17] = [
     b'`',  // `raw_text` (code (text))
     b'h',  // `gfm_autolink_literal` (`protocol` kind)
     b'w',  // `gfm_autolink_literal` (`www.` kind)
-    b'{',  // `mdx_expression_text`
+    b'{',  // `compmd_interpolation`, `mdx_expression_text`
     b'~',  // `attention` (gfm strikethrough)
 ];
 
@@ -165,15 +166,48 @@ pub fn before(tokenizer: &mut Tokenizer) -> State {
             );
             State::Retry(StateName::LabelEndStart)
         }
+        // `compmd_interpolation`, `compmd_interpolation_literal`, `mdx_expression_text` (order matters).
         Some(b'{') => {
             tokenizer.attempt(
                 State::Next(StateName::TextBefore),
-                State::Next(StateName::TextBeforeData),
+                State::Next(StateName::TextBeforeCompmdInterpolationLiteral),
             );
-            State::Retry(StateName::MdxExpressionTextStart)
+            State::Retry(StateName::CompmdInterpolationStart)
         }
         _ => State::Retry(StateName::TextBeforeData),
     }
+}
+
+/// Before a CompMD `{{` that starts no interpolation.
+///
+/// At `{`, which wasn’t an interpolation.
+///
+/// ```markdown
+/// > | a {{ 1 + 2 }}
+///       ^
+/// ```
+pub fn before_compmd_interpolation_literal(tokenizer: &mut Tokenizer) -> State {
+    tokenizer.attempt(
+        State::Next(StateName::TextBefore),
+        State::Next(StateName::TextBeforeMdxExpression),
+    );
+    State::Retry(StateName::CompmdInterpolationLiteralStart)
+}
+
+/// Before mdx expression (text).
+///
+/// At `{`, which wasn’t a CompMD interpolation.
+///
+/// ```markdown
+/// > | a {b}
+///       ^
+/// ```
+pub fn before_mdx_expression(tokenizer: &mut Tokenizer) -> State {
+    tokenizer.attempt(
+        State::Next(StateName::TextBefore),
+        State::Next(StateName::TextBeforeData),
+    );
+    State::Retry(StateName::MdxExpressionTextStart)
 }
 
 /// Before html (text).

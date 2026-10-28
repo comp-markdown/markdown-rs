@@ -295,6 +295,10 @@ fn enter(context: &mut CompileContext) -> Result<(), message::Message> {
             on_enter_compmd_raw(context, CompmdRawKind::ComponentInline);
         }
         Name::CompmdComponentLine => on_enter_compmd_raw(context, CompmdRawKind::ComponentLine),
+        Name::CompmdInterpolation => on_enter_compmd_raw(context, CompmdRawKind::Interpolation),
+        Name::CompmdInterpolationLiteral => {
+            on_enter_compmd_raw(context, CompmdRawKind::InterpolationLiteral);
+        }
         Name::Definition => on_enter_definition(context),
         Name::Emphasis => on_enter_emphasis(context),
         Name::Frontmatter => on_enter_frontmatter(context),
@@ -391,7 +395,10 @@ fn exit(context: &mut CompileContext) -> Result<(), message::Message> {
         Name::CodeFenced | Name::MathFlow => on_exit_raw_flow(context)?,
         Name::CodeIndented => on_exit_code_indented(context)?,
         Name::CodeText | Name::MathText => on_exit_raw_text(context)?,
-        Name::CompmdComponentInline | Name::CompmdComponentLine => on_exit_compmd_raw(context)?,
+        Name::CompmdComponentInline
+        | Name::CompmdComponentLine
+        | Name::CompmdInterpolation
+        | Name::CompmdInterpolationLiteral => on_exit_compmd_raw(context)?,
         Name::DefinitionDestinationString => on_exit_definition_destination_string(context),
         Name::DefinitionLabelString | Name::GfmFootnoteDefinitionLabelString => {
             on_exit_definition_id(context);
@@ -700,7 +707,7 @@ fn on_enter_strong(context: &mut CompileContext) {
     }));
 }
 
-/// Handle [`Enter`][Kind::Enter]:{[`CompmdComponentInline`][Name::CompmdComponentInline],[`CompmdComponentLine`][Name::CompmdComponentLine]}.
+/// Handle [`Enter`][Kind::Enter]:`Compmd*`.
 fn on_enter_compmd_raw(context: &mut CompileContext, kind: CompmdRawKind) {
     context.tail_push(Node::CompmdRaw(CompmdRaw {
         kind,
@@ -1132,7 +1139,7 @@ fn on_exit_data(context: &mut CompileContext) -> Result<(), message::Message> {
     Ok(())
 }
 
-/// Handle [`Exit`][Kind::Exit]:{[`CompmdComponentInline`][Name::CompmdComponentInline],[`CompmdComponentLine`][Name::CompmdComponentLine]}.
+/// Handle [`Exit`][Kind::Exit]:`Compmd*`.
 fn on_exit_compmd_raw(context: &mut CompileContext) -> Result<(), message::Message> {
     let value = Slice::from_position(
         context.bytes,

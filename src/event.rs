@@ -591,6 +591,42 @@ pub enum Name {
     ///     ^^^^^^^^^^^^^^^^^^^^^
     /// ```
     CompmdComponentLine,
+    /// CompMD: interpolation.
+    ///
+    /// ## Info
+    ///
+    /// * **Context**:
+    ///   [text content][crate::construct::text]
+    /// * **Content model**:
+    ///   void
+    /// * **Construct**:
+    ///   [`compmd_interpolation`][crate::construct::compmd_interpolation]
+    ///
+    /// ## Example
+    ///
+    /// ```markdown
+    /// > | a {{ md.doc.title }} b
+    ///       ^^^^^^^^^^^^^^^^^^
+    /// ```
+    CompmdInterpolation,
+    /// CompMD: `{{` that starts no interpolation.
+    ///
+    /// ## Info
+    ///
+    /// * **Context**:
+    ///   [text content][crate::construct::text]
+    /// * **Content model**:
+    ///   void
+    /// * **Construct**:
+    ///   [`compmd_interpolation`][crate::construct::compmd_interpolation]
+    ///
+    /// ## Example
+    ///
+    /// ```markdown
+    /// > | a {{ 1 + 2 }} b
+    ///       ^^
+    /// ```
+    CompmdInterpolationLiteral,
     /// Content.
     ///
     /// ## Info
@@ -3417,7 +3453,7 @@ pub enum Name {
 }
 
 /// List of void events, used to make sure everything is working well.
-pub const VOID_EVENTS: [Name; 78] = [
+pub const VOID_EVENTS: [Name; 80] = [
     Name::AttentionSequence,
     Name::AutolinkEmail,
     Name::AutolinkMarker,
@@ -3438,6 +3474,8 @@ pub const VOID_EVENTS: [Name; 78] = [
     Name::CodeTextSequence,
     Name::CompmdComponentInline,
     Name::CompmdComponentLine,
+    Name::CompmdInterpolation,
+    Name::CompmdInterpolationLiteral,
     Name::Data,
     Name::DefinitionDestinationLiteralMarker,
     Name::DefinitionLabelMarker,

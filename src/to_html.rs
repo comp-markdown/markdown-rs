@@ -374,6 +374,8 @@ fn exit(context: &mut CompileContext) {
         Name::CharacterEscapeValue
         | Name::CodeTextData
         | Name::CompmdComponentInline
+        | Name::CompmdInterpolation
+        | Name::CompmdInterpolationLiteral
         | Name::Data
         | Name::MathTextData => {
             on_exit_data(context);

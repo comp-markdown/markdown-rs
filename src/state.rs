@@ -110,6 +110,16 @@ pub enum Name {
     CompmdComponentLineBefore,
     CompmdComponentLineInside,
 
+    CompmdInterpolationStart,
+    CompmdInterpolationOpen,
+    CompmdInterpolationBeforePath,
+    CompmdInterpolationNameStart,
+    CompmdInterpolationName,
+    CompmdInterpolationAfterPath,
+    CompmdInterpolationClose,
+    CompmdInterpolationLiteralStart,
+    CompmdInterpolationLiteralOpen,
+
     ContentChunkStart,
     ContentChunkInside,
     ContentDefinitionBefore,
@@ -480,6 +490,8 @@ pub enum Name {
     TextBeforeMdxJsx,
     TextBeforeHardBreakEscape,
     TextBeforeLabelStartLink,
+    TextBeforeCompmdInterpolationLiteral,
+    TextBeforeMdxExpression,
     TextBeforeData,
 
     ThematicBreakStart,
@@ -586,6 +598,16 @@ pub fn call(tokenizer: &mut Tokenizer, name: Name) -> State {
         Name::CompmdComponentLineStart => construct::compmd_component_line::start,
         Name::CompmdComponentLineBefore => construct::compmd_component_line::before,
         Name::CompmdComponentLineInside => construct::compmd_component_line::inside,
+
+        Name::CompmdInterpolationStart => construct::compmd_interpolation::start,
+        Name::CompmdInterpolationOpen => construct::compmd_interpolation::open,
+        Name::CompmdInterpolationBeforePath => construct::compmd_interpolation::before_path,
+        Name::CompmdInterpolationNameStart => construct::compmd_interpolation::name_start,
+        Name::CompmdInterpolationName => construct::compmd_interpolation::name,
+        Name::CompmdInterpolationAfterPath => construct::compmd_interpolation::after_path,
+        Name::CompmdInterpolationClose => construct::compmd_interpolation::close,
+        Name::CompmdInterpolationLiteralStart => construct::compmd_interpolation::literal_start,
+        Name::CompmdInterpolationLiteralOpen => construct::compmd_interpolation::literal_open,
 
         Name::ContentChunkStart => construct::content::chunk_start,
         Name::ContentChunkInside => construct::content::chunk_inside,
@@ -1027,6 +1049,10 @@ pub fn call(tokenizer: &mut Tokenizer, name: Name) -> State {
         Name::TextBeforeMdxJsx => construct::text::before_mdx_jsx,
         Name::TextBeforeHardBreakEscape => construct::text::before_hard_break_escape,
         Name::TextBeforeLabelStartLink => construct::text::before_label_start_link,
+        Name::TextBeforeCompmdInterpolationLiteral => {
+            construct::text::before_compmd_interpolation_literal
+        }
+        Name::TextBeforeMdxExpression => construct::text::before_mdx_expression,
         Name::TextBeforeData => construct::text::before_data,
 
         Name::ThematicBreakStart => construct::thematic_break::start,

@@ -64,6 +64,7 @@
 //!
 //! * [compmd component inline][compmd_component_inline]
 //! * [compmd component line][compmd_component_line]
+//! * [compmd interpolation][compmd_interpolation]
 //! * [frontmatter][]
 //! * [gfm autolink literal][gfm_autolink_literal]
 //! * [gfm footnote definition][gfm_footnote_definition]
@@ -159,6 +160,7 @@ pub mod character_reference;
 pub mod code_indented;
 pub mod compmd_component_inline;
 pub mod compmd_component_line;
+pub mod compmd_interpolation;
 pub mod content;
 pub mod definition;
 pub mod document;
