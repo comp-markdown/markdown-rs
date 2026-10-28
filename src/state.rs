@@ -120,6 +120,12 @@ pub enum Name {
     CompmdInterpolationLiteralStart,
     CompmdInterpolationLiteralOpen,
 
+    CompmdMathTextStart,
+    CompmdMathTextOpen,
+    CompmdMathTextInside,
+    CompmdMathTextContent,
+    CompmdMathTextEscape,
+
     ContentChunkStart,
     ContentChunkInside,
     ContentDefinitionBefore,
@@ -490,6 +496,7 @@ pub enum Name {
     TextBeforeMdxJsx,
     TextBeforeHardBreakEscape,
     TextBeforeLabelStartLink,
+    TextBeforeRawText,
     TextBeforeCompmdInterpolationLiteral,
     TextBeforeMdxExpression,
     TextBeforeData,
@@ -608,6 +615,12 @@ pub fn call(tokenizer: &mut Tokenizer, name: Name) -> State {
         Name::CompmdInterpolationClose => construct::compmd_interpolation::close,
         Name::CompmdInterpolationLiteralStart => construct::compmd_interpolation::literal_start,
         Name::CompmdInterpolationLiteralOpen => construct::compmd_interpolation::literal_open,
+
+        Name::CompmdMathTextStart => construct::compmd_math_text::start,
+        Name::CompmdMathTextOpen => construct::compmd_math_text::open,
+        Name::CompmdMathTextInside => construct::compmd_math_text::inside,
+        Name::CompmdMathTextContent => construct::compmd_math_text::content,
+        Name::CompmdMathTextEscape => construct::compmd_math_text::escape,
 
         Name::ContentChunkStart => construct::content::chunk_start,
         Name::ContentChunkInside => construct::content::chunk_inside,
@@ -1049,6 +1062,7 @@ pub fn call(tokenizer: &mut Tokenizer, name: Name) -> State {
         Name::TextBeforeMdxJsx => construct::text::before_mdx_jsx,
         Name::TextBeforeHardBreakEscape => construct::text::before_hard_break_escape,
         Name::TextBeforeLabelStartLink => construct::text::before_label_start_link,
+        Name::TextBeforeRawText => construct::text::before_raw_text,
         Name::TextBeforeCompmdInterpolationLiteral => {
             construct::text::before_compmd_interpolation_literal
         }

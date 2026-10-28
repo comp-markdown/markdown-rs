@@ -545,8 +545,6 @@ pub enum CompmdRawKind {
     Interpolation,
     /// `{{` that starts no interpolation.
     InterpolationLiteral,
-    /// Math (text), by Pandoc’s rule: `$x^2$`.
-    MathText,
     /// Wiki link: `[[Target|label]]`.
     WikiLink,
 }

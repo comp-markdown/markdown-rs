@@ -12,6 +12,7 @@
 //! * [Character reference][crate::construct::character_reference]
 //! * [CompMD: inline component][crate::construct::compmd_component_inline]
 //! * [CompMD: interpolation][crate::construct::compmd_interpolation]
+//! * [CompMD: math (text)][crate::construct::compmd_math_text]
 //! * [Raw (text)][crate::construct::raw_text] (code (text), math (text))
 //! * [GFM: Label start (footnote)][crate::construct::gfm_label_start_footnote]
 //! * [GFM: Task list item check][crate::construct::gfm_task_list_item_check]
@@ -36,7 +37,7 @@ use crate::tokenizer::Tokenizer;
 /// Characters that can start something in text.
 const MARKERS: [u8; 17] = [
     b'!',  // `label_start_image`
-    b'$',  // `raw_text` (math (text))
+    b'$',  // `compmd_math_text`, `raw_text` (math (text))
     b'&',  // `character_reference`
     b'*',  // `attention` (emphasis, strong)
     b':',  // `compmd_component_inline`
@@ -93,14 +94,16 @@ pub fn before(tokenizer: &mut Tokenizer) -> State {
             );
             State::Retry(StateName::LabelStartImageStart)
         }
-        // raw (text) (code (text), math (text))
-        Some(b'$' | b'`') => {
+        // `compmd_math_text`, raw (text) (math (text)) (order matters).
+        Some(b'$') => {
             tokenizer.attempt(
                 State::Next(StateName::TextBefore),
-                State::Next(StateName::TextBeforeData),
+                State::Next(StateName::TextBeforeRawText),
             );
-            State::Retry(StateName::RawTextStart)
+            State::Retry(StateName::CompmdMathTextStart)
         }
+        // raw (text) (code (text))
+        Some(b'`') => State::Retry(StateName::TextBeforeRawText),
         Some(b'&') => {
             tokenizer.attempt(
                 State::Next(StateName::TextBefore),
@@ -176,6 +179,22 @@ pub fn before(tokenizer: &mut Tokenizer) -> State {
         }
         _ => State::Retry(StateName::TextBeforeData),
     }
+}
+
+/// Before raw (text).
+///
+/// At `` ` ``, or at `$` which wasn’t CompMD math (text).
+///
+/// ```markdown
+/// > | a `b`
+///       ^
+/// ```
+pub fn before_raw_text(tokenizer: &mut Tokenizer) -> State {
+    tokenizer.attempt(
+        State::Next(StateName::TextBefore),
+        State::Next(StateName::TextBeforeData),
+    );
+    State::Retry(StateName::RawTextStart)
 }
 
 /// Before a CompMD `{{` that starts no interpolation.
