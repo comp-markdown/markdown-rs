@@ -187,5 +187,37 @@ fn frontmatter() -> Result<(), message::Message> {
         "should support toml as `Toml`s in mdast"
     );
 
+    let with = |frontmatter, constructs: Constructs| ParseOptions {
+        constructs: Constructs {
+            frontmatter,
+            ..constructs
+        },
+        ..ParseOptions::default()
+    };
+    for constructs in [
+        Constructs::default(),
+        Constructs::gfm(),
+        Constructs::compmd(),
+    ] {
+        for value in [
+            "---\nus\n- a\n",
+            "---\nus\n\n- a\n- b\n\n  c\n",
+            "---\n\nus\n- a\n",
+            "---\na: b\n\n> q\n> r\nlazy\n",
+            "---\na\n```\ncode\n```\nafter\n",
+            "---\n# heading\nb\n===\n",
+            "---\r\nus\r\n- a\r\n",
+            "+++\nus\n- a\n",
+            "--- \t\nus\n1. a\n2. b\n",
+            "---\n[x]: /y\n\n[x] and[^1]\n\n[^1]: note\n    more\n",
+        ] {
+            assert_eq!(
+                to_mdast(value, &with(true, constructs.clone()))?,
+                to_mdast(value, &with(false, constructs.clone()))?,
+                "should parse the same as without frontmatter when no fence closes it: {value:?}"
+            );
+        }
+    }
+
     Ok(())
 }

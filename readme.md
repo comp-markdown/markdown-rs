@@ -23,7 +23,8 @@
 > * Raw CompMD forms come out as `Node::CompmdRaw` nodes in mdast and as escaped text in HTML.
 > * `ParseOptions::definitions` and `gfm_footnote_definitions` take labels defined outside the text, so part of a
 >   document parses its references as it would in place (mdast only; HTML ignores them).
-> * The fork also fixes whitespace after a first word in `normalize_identifier`.
+> * The fork also fixes whitespace after a first word in `normalize_identifier`, and lines after a first `---`
+>   that no fence closes, which the `frontmatter` construct made the tokenizer skip.
 >
 > Running the tests needs older versions of a few of `swc_common`'s dependencies, because `swc_common` 8 doesn't build
 > with serde 1.0.220 or newer. `Cargo.lock` isn't committed, so pin them once in a fresh clone:
