@@ -21,6 +21,8 @@
 >   (on by default), which lets `frontmatter` be YAML only.
 > * `Constructs::compmd()` turns on GFM, YAML frontmatter, display math and all CompMD constructs except wiki links.
 > * Raw CompMD forms come out as `Node::CompmdRaw` nodes in mdast and as escaped text in HTML.
+> * `ParseOptions::definitions` and `gfm_footnote_definitions` take labels defined outside the text, so part of a
+>   document parses its references as it would in place (mdast only; HTML ignores them).
 > * The fork also fixes whitespace after a first word in `normalize_identifier`.
 >
 > Running the tests needs older versions of a few of `swc_common`'s dependencies, because `swc_common` 8 doesn't build

@@ -2,7 +2,7 @@ use crate::util::{
     line_ending::LineEnding,
     mdx::{EsmParse as MdxEsmParse, ExpressionParse as MdxExpressionParse},
 };
-use alloc::{boxed::Box, fmt, string::String};
+use alloc::{boxed::Box, fmt, string::String, vec, vec::Vec};
 
 /// Control which constructs are enabled.
 ///
@@ -1316,6 +1316,49 @@ pub struct ParseOptions {
     /// `tests/test_utils/mod.rs`.
     #[cfg_attr(feature = "serde", serde(skip))]
     pub mdx_esm_parse: Option<Box<MdxEsmParse>>,
+
+    /// Labels of link reference definitions defined outside the text.
+    ///
+    /// A reference such as `[a][b]` or `[b]` is a link only when its label
+    /// is defined.
+    /// These labels count as defined, as if their definitions were in the
+    /// text, so that part of a document parses as it would in place.
+    /// Labels are compared as references compare them (case and runs of
+    /// white space don’t matter), so an mdast `identifier` works.
+    ///
+    /// It only makes sense to pass this when compiling to a syntax tree
+    /// with [`to_mdast()`][crate::to_mdast()]; HTML ignores it, since it has
+    /// no destinations for these labels.
+    ///
+    /// ## Examples
+    ///
+    /// ```
+    /// use markdown::{mdast::Node, to_mdast, ParseOptions};
+    /// # fn main() -> Result<(), markdown::message::Message> {
+    ///
+    /// let options = ParseOptions {
+    ///     definitions: vec!["Docs".into()],
+    ///     ..ParseOptions::default()
+    /// };
+    /// let tree = to_mdast("[the docs][docs]", &options)?;
+    /// let paragraph = &tree.children().unwrap()[0];
+    /// assert!(matches!(paragraph.children().unwrap()[0], Node::LinkReference(_)));
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[cfg_attr(feature = "serde", serde(default))]
+    pub definitions: Vec<String>,
+
+    /// Labels of GFM footnote definitions defined outside the text.
+    ///
+    /// As [`definitions`][Self::definitions], for footnote calls (`[^a]`):
+    /// a call is a footnote reference only when its label is defined.
+    /// Labels are written without the `^`.
+    ///
+    /// It only makes sense to pass this when compiling to a syntax tree
+    /// with [`to_mdast()`][crate::to_mdast()]; HTML ignores it.
+    #[cfg_attr(feature = "serde", serde(default))]
+    pub gfm_footnote_definitions: Vec<String>,
     // Note: when adding fields, don’t forget to add them to `fmt::Debug` below.
 }
 
@@ -1336,6 +1379,8 @@ impl fmt::Debug for ParseOptions {
                 "mdx_esm_parse",
                 &self.mdx_esm_parse.as_ref().map(|_d| "[Function]"),
             )
+            .field("definitions", &self.definitions)
+            .field("gfm_footnote_definitions", &self.gfm_footnote_definitions)
             .finish()
     }
 }
@@ -1349,6 +1394,8 @@ impl Default for ParseOptions {
             math_text_single_dollar: true,
             mdx_expression_parse: None,
             mdx_esm_parse: None,
+            definitions: vec![],
+            gfm_footnote_definitions: vec![],
         }
     }
 }
@@ -1570,7 +1617,7 @@ mod tests {
 
         assert_eq!(
             format!("{:?}", ParseOptions::default()),
-            "ParseOptions { constructs: Constructs { attention: true, autolink: true, block_quote: true, character_escape: true, character_reference: true, code_indented: true, code_fenced: true, code_text: true, compmd_component_inline: false, compmd_component_line: false, compmd_interpolation: false, compmd_math_text: false, compmd_wiki_link: false, definition: true, frontmatter: false, frontmatter_toml: true, gfm_autolink_literal: false, gfm_footnote_definition: false, gfm_label_start_footnote: false, gfm_strikethrough: false, gfm_table: false, gfm_task_list_item: false, hard_break_escape: true, hard_break_trailing: true, heading_atx: true, heading_setext: true, html_flow: true, html_text: true, label_start_image: true, label_start_link: true, label_end: true, list_item: true, math_flow: false, math_text: false, mdx_esm: false, mdx_expression_flow: false, mdx_expression_text: false, mdx_jsx_flow: false, mdx_jsx_text: false, thematic_break: true }, gfm_strikethrough_single_tilde: true, math_text_single_dollar: true, mdx_expression_parse: None, mdx_esm_parse: None }",
+            "ParseOptions { constructs: Constructs { attention: true, autolink: true, block_quote: true, character_escape: true, character_reference: true, code_indented: true, code_fenced: true, code_text: true, compmd_component_inline: false, compmd_component_line: false, compmd_interpolation: false, compmd_math_text: false, compmd_wiki_link: false, definition: true, frontmatter: false, frontmatter_toml: true, gfm_autolink_literal: false, gfm_footnote_definition: false, gfm_label_start_footnote: false, gfm_strikethrough: false, gfm_table: false, gfm_task_list_item: false, hard_break_escape: true, hard_break_trailing: true, heading_atx: true, heading_setext: true, html_flow: true, html_text: true, label_start_image: true, label_start_link: true, label_end: true, list_item: true, math_flow: false, math_text: false, mdx_esm: false, mdx_expression_flow: false, mdx_expression_text: false, mdx_jsx_flow: false, mdx_jsx_text: false, thematic_break: true }, gfm_strikethrough_single_tilde: true, math_text_single_dollar: true, mdx_expression_parse: None, mdx_esm_parse: None, definitions: [], gfm_footnote_definitions: [] }",
             "should support `Debug` trait"
         );
         assert_eq!(
@@ -1583,7 +1630,7 @@ mod tests {
                 })),
                 ..Default::default()
             }),
-            "ParseOptions { constructs: Constructs { attention: true, autolink: true, block_quote: true, character_escape: true, character_reference: true, code_indented: true, code_fenced: true, code_text: true, compmd_component_inline: false, compmd_component_line: false, compmd_interpolation: false, compmd_math_text: false, compmd_wiki_link: false, definition: true, frontmatter: false, frontmatter_toml: true, gfm_autolink_literal: false, gfm_footnote_definition: false, gfm_label_start_footnote: false, gfm_strikethrough: false, gfm_table: false, gfm_task_list_item: false, hard_break_escape: true, hard_break_trailing: true, heading_atx: true, heading_setext: true, html_flow: true, html_text: true, label_start_image: true, label_start_link: true, label_end: true, list_item: true, math_flow: false, math_text: false, mdx_esm: false, mdx_expression_flow: false, mdx_expression_text: false, mdx_jsx_flow: false, mdx_jsx_text: false, thematic_break: true }, gfm_strikethrough_single_tilde: true, math_text_single_dollar: true, mdx_expression_parse: Some(\"[Function]\"), mdx_esm_parse: Some(\"[Function]\") }",
+            "ParseOptions { constructs: Constructs { attention: true, autolink: true, block_quote: true, character_escape: true, character_reference: true, code_indented: true, code_fenced: true, code_text: true, compmd_component_inline: false, compmd_component_line: false, compmd_interpolation: false, compmd_math_text: false, compmd_wiki_link: false, definition: true, frontmatter: false, frontmatter_toml: true, gfm_autolink_literal: false, gfm_footnote_definition: false, gfm_label_start_footnote: false, gfm_strikethrough: false, gfm_table: false, gfm_task_list_item: false, hard_break_escape: true, hard_break_trailing: true, heading_atx: true, heading_setext: true, html_flow: true, html_text: true, label_start_image: true, label_start_link: true, label_end: true, list_item: true, math_flow: false, math_text: false, mdx_esm: false, mdx_expression_flow: false, mdx_expression_text: false, mdx_jsx_flow: false, mdx_jsx_text: false, thematic_break: true }, gfm_strikethrough_single_tilde: true, math_text_single_dollar: true, mdx_expression_parse: Some(\"[Function]\"), mdx_esm_parse: Some(\"[Function]\"), definitions: [], gfm_footnote_definitions: [] }",
             "should support `Debug` trait on mdx functions"
         );
     }

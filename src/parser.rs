@@ -5,7 +5,7 @@ use crate::message;
 use crate::state::{Name as StateName, State};
 use crate::subtokenize::subtokenize;
 use crate::tokenizer::Tokenizer;
-use crate::util::location::Location;
+use crate::util::{location::Location, normalize_identifier::normalize_identifier};
 use crate::ParseOptions;
 use alloc::{string::String, vec, vec::Vec};
 
@@ -29,12 +29,27 @@ pub struct ParseState<'a> {
 
 /// Turn a string of markdown into events.
 ///
+/// With `outside`, the labels `options` defines outside the text count as
+/// defined.
+///
 /// Passes the bytes back so the compiler can access the source.
 pub fn parse<'a>(
     value: &'a str,
     options: &'a ParseOptions,
+    outside: bool,
 ) -> Result<(Vec<Event>, ParseState<'a>), message::Message> {
     let bytes = value.as_bytes();
+    let defined = |labels: &[String]| -> Vec<String> {
+        if outside {
+            labels
+                .iter()
+                .map(String::as_str)
+                .map(normalize_identifier)
+                .collect()
+        } else {
+            vec![]
+        }
+    };
 
     let mut parse_state = ParseState {
         options,
@@ -44,8 +59,8 @@ pub fn parse<'a>(
         } else {
             None
         },
-        definitions: vec![],
-        gfm_footnote_definitions: vec![],
+        definitions: defined(&options.definitions),
+        gfm_footnote_definitions: defined(&options.gfm_footnote_definitions),
     };
 
     let start = Point {
