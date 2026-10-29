@@ -129,5 +129,47 @@ fn fuzz() -> Result<(), message::Message> {
         "12: mdx: handle invalid mdx without panic (GH-26)"
     );
 
+    // A setext underline after only definitions moves into the paragraph
+    // after it, which an underline of its own makes a heading, as in
+    // `micromark`.
+    for (input, expected, message) in [
+        (
+            "[l]:x\n-\n1\n-",
+            "<h2>-\n1</h2>",
+            "13-a: an underline moved into a heading",
+        ),
+        ("[l]:x\n=\n1\n=", "<h1>=\n1</h1>", "13-b: the same with `=`"),
+        (
+            "[l]:x\n-\n1\n2\n-",
+            "<h2>-\n1\n2</h2>",
+            "13-c: more lines in between",
+        ),
+        (
+            "[l]:x\n-\n1\n=",
+            "<h1>-\n1</h1>",
+            "13-d: a `=` underline after a `-` one",
+        ),
+        (
+            "[l]:x\n-",
+            "<p>-</p>",
+            "13-e: an underline with no paragraph after it",
+        ),
+    ] {
+        assert_eq!(to_html(input), expected, "{}", message);
+        assert!(
+            matches!(
+                to_mdast(input, &Default::default()),
+                Ok(mdast::Node::Root(_))
+            ),
+            "{}: mdast",
+            message
+        );
+    }
+
+    assert!(
+        to_html_with_options("[^1]: x\n-\n1\n-", &Options::gfm()).is_ok(),
+        "13-f: gfm: the same after a footnote definition"
+    );
+
     Ok(())
 }
