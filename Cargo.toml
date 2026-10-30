@@ -27,18 +27,23 @@ log = ["dep:log"]
 serde = ["dep:serde"]
 
 [package]
-authors = ["Titus Wormer <tituswormer@gmail.com>"]
+authors = ["Titus Wormer <tituswormer@gmail.com>", "Hakan Serce"]
 categories = ["compilers", "encoding", "parser-implementations", "parsing", "text-processing"]
-description = "CommonMark compliant markdown parser in Rust with ASTs and extensions"
+description = "CompMD's fork of markdown-rs: the CommonMark compliant markdown parser, with the syntax of CompMD (Component Markdown)"
 edition = "2018"
-homepage = "https://github.com/wooorm/markdown-rs"
-include = ["src/", "license"]
-keywords = ["commonmark", "markdown", "parse", "render", "tokenize"]
+homepage = "https://compmd.hakanserce.com/"
+include = ["src/", "license", "readme.md"]
+keywords = ["commonmark", "markdown", "compmd", "parser", "components"]
 license = "MIT"
-name = "markdown"
-repository = "https://github.com/wooorm/markdown-rs"
+# Published as `compmd-markdown`; the library keeps the name `markdown`, as upstream's.
+name = "compmd-markdown"
+readme = "readme.md"
+repository = "https://github.com/comp-markdown/markdown-rs"
 rust-version = "1.56"
-version = "1.0.0"
+version = "0.1.0"
+
+[lib]
+name = "markdown"
 
 [workspace]
 members = ["generate", "mdast_util_to_markdown"]
