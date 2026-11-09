@@ -22,7 +22,8 @@
 > * `Constructs::compmd()` turns on GFM, YAML frontmatter, display math and all CompMD constructs except wiki links.
 > * Raw CompMD forms come out as `Node::CompmdRaw` nodes in mdast and as escaped text in HTML.
 > * `ParseOptions::definitions` and `gfm_footnote_definitions` take labels defined outside the text, so part of a
->   document parses its references as it would in place (mdast only; HTML ignores them).
+>   document parses its references as it would in place (mdast only; HTML ignores them). Upstream:
+>   [wooorm/markdown-rs#292](https://github.com/wooorm/markdown-rs/issues/292).
 > * The fork also fixes whitespace after a first word in `normalize_identifier`, and lines after a first `---`
 >   that no fence closes, which the `frontmatter` construct made the tokenizer skip.
 >
