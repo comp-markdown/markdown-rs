@@ -171,5 +171,58 @@ fn fuzz() -> Result<(), message::Message> {
         "13-f: gfm: the same after a footnote definition"
     );
 
+    // A line that could be an underline but has no paragraph text before it
+    // is what it would otherwise be, as in `micromark`.
+    for (input, expected, message) in [
+        (
+            "a\n=\n---",
+            "<h1>a</h1>\n<hr />",
+            "14-a: a thematic break after a heading (GH-286)",
+        ),
+        (
+            "[a]: b\n-\n-",
+            "<h2>-</h2>",
+            "14-b: paragraph text after only definitions, then a heading (GH-286)",
+        ),
+        (
+            "a\n=\n=",
+            "<h1>a</h1>\n<p>=</p>",
+            "14-c: paragraph text after a heading",
+        ),
+        (
+            "a\n=\n-",
+            "<h1>a</h1>\n<ul>\n<li></li>\n</ul>",
+            "14-d: a list item after a heading",
+        ),
+        (
+            "x\n=\n=\nx\n=\n",
+            "<h1>x</h1>\n<h1>=\nx</h1>\n",
+            "14-e: underlines after underlines (GH-210)",
+        ),
+        (
+            "Foo *bar*\n=========\n---------\nr*\n=========\n--------",
+            "<h1>Foo <em>bar</em></h1>\n<hr />\n<h1>r*</h1>\n<hr />",
+            "14-f: thematic breaks after headings (GH-210)",
+        ),
+        (
+            "a\n-\n--\na\n-",
+            "<h2>a</h2>\n<h2>--\na</h2>",
+            "14-g: a heading after a heading (GH-210)",
+        ),
+        (
+            "[:]:a\n-\na\n-",
+            "<h2>-\na</h2>",
+            "14-h: a heading after only definitions (GH-210)",
+        ),
+    ] {
+        assert_eq!(to_html(input), expected, "{}", message);
+        assert_eq!(
+            to_html_with_options(input, &Options::gfm()),
+            Ok(expected.into()),
+            "{}: gfm",
+            message
+        );
+    }
+
     Ok(())
 }
