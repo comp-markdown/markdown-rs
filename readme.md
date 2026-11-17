@@ -17,9 +17,9 @@
 > crate `compmd-markdown` (the library keeps the name `markdown`).
 >
 > * Flags, all off by default: `compmd_component_line`, `compmd_component_inline`, `compmd_interpolation`,
->   `compmd_math_text` (inline math by Pandoc's rule) and `compmd_wiki_link`; also `frontmatter_toml`
->   (on by default), which lets `frontmatter` be YAML only.
-> * `Constructs::compmd()` turns on GFM, YAML frontmatter, display math and all CompMD constructs except wiki links.
+>   `compmd_math_text` (inline math by Pandoc's rule) and `compmd_wiki_link`.
+> * `Constructs::compmd()` turns on GFM, frontmatter (YAML and TOML), display math and all CompMD constructs except
+>   wiki links.
 > * Raw CompMD forms come out as `Node::CompmdRaw` nodes in mdast and as escaped text in HTML.
 > * `ParseOptions::definitions` and `gfm_footnote_definitions` take labels defined outside the text, so part of a
 >   document parses its references as it would in place (mdast only; HTML ignores them). Upstream:
